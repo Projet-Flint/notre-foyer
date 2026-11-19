@@ -1,0 +1,17 @@
+{
+  "name": "Notre Foyer",
+  "short_name": "Notre Foyer",
+  "description": "L'app du foyer : agenda, courses, tâches, travail, projets et finances.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E9EFED",
+  "theme_color": "#1E6B5C",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
