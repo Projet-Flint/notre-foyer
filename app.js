@@ -35,6 +35,8 @@ function render(opts = {}) {
   const key = screenKey();
   const myColor = H.color(H.me);
   document.documentElement.style.setProperty('--me', myColor);
+  document.documentElement.style.setProperty('--p1', H.color(H.p1));
+  document.documentElement.style.setProperty('--p2', H.color(H.p2));
   let html;
   if (UI.view) {
     html = { reglages: viewReglages, eleve: viewEleve, bilan: viewBilan, types: viewTypes, projet: viewProjet, shifts: viewShifts }[UI.view.name]();

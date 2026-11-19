@@ -12,9 +12,19 @@
 <meta name="theme-color" content="#E9EFED" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0B110F" media="(prefers-color-scheme: dark)">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="manifest" id="lnkManifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" id="lnkTouch" href="icons/icon-180.png">
+<link rel="icon" type="image/png" id="lnkIcon" href="icons/icon-192.png">
+<script>
+// Logo choisi dans les Réglages (a, b ou c), appliqué avant tout le reste pour que « Sur l'écran d'accueil » le prenne.
+function applyLogo(l) {
+  if (!/^[abc]$/.test(l || '')) l = 'b';
+  document.getElementById('lnkTouch').href = 'icons/icon-' + l + '-180.png';
+  document.getElementById('lnkIcon').href = 'icons/icon-' + l + '-192.png';
+  document.getElementById('lnkManifest').href = 'manifest-' + l + '.webmanifest';
+}
+try { applyLogo((JSON.parse(localStorage.getItem('notrefoyer.v1')) || {}).settings.logo); } catch (e) { applyLogo('b'); }
+</script>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -29,6 +39,7 @@
 <script src="famille.js"></script>
 <script src="autres.js"></script>
 <script src="infirmiere.js"></script>
+<script src="partage.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

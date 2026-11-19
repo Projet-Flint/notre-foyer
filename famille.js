@@ -89,7 +89,8 @@ function pageAgenda() {
     `data-long="eventMenu" data-id="${e.id}"`)).join('');
   if (!rows) rows = `<div class="empty">Rien de prévu ce jour-là.</div>`;
   return `<div class="scroll">
-    <div class="sec">${switcher(['Semaine', 'Mois'], mode, 'agendaMode', { key: 'agmode', cls: 'inline small' })}</div>
+    <div class="sec" style="display:flex;gap:8px;align-items:center"><div style="flex:1;min-width:0">${switcher(['Semaine', 'Mois'], mode, 'agendaMode', { key: 'agmode', cls: 'inline small' })}</div>
+      <button class="iconbtn glass press" data-a="shareSchedule" data-v="agenda" aria-label="Partager l'agenda">${ic('share', 18)}</button></div>
     ${top}
     ${section(esc(cap(dayLabel(sel))), rows)}
   </div>

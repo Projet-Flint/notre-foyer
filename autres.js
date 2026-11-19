@@ -164,6 +164,7 @@ function workHoraires() {
       ${isToday && nowH >= S0 && nowH <= E0 ? `<div class="nowline" style="top:${14 + (nowH - S0) * ROW}px"></div>` : ''}
       ${blocks}
     </div>
+    <div class="sec btnrow" style="margin-top:12px"><button class="btn glass press" data-a="shareSchedule" data-v="cours">${ic('share', 18)}<span>Partager mes horaires</span></button></div>
     <div class="hint">Touchez le haut d'une case pour l'heure pile, le bas pour la demie. Touchez une leçon pour la lier à un élève ou la retirer.</div>`;
 }
 A.workDay = d => { const n = +d.v; UI.workDay = n === 0 ? todayKey() : dkey(addDays(parseKey(UI.workDay), n)); render(); };
@@ -684,6 +685,9 @@ function viewReglages() {
     ${section('Métier', [H.p1, H.p2].map(n => `<div class="field"><span class="flabel">${esc(n)}</span><select data-job="${esc(n)}">${JOBS.map(([v, l]) => `<option value="${v}" ${jobOf(n) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`).join(''),
       'L\'onglet Travail s\'adapte au métier de la personne à qui appartient ce téléphone : leçons et élèves, planning de gardes d\'infirmière, ou une journée simple avec priorités et notes.')}
     ${section('Couleurs', colorRow(H.p1) + colorRow(H.p2) + colorRow(BOTH), 'Touchez le rond pour choisir une photo. Photo et couleur servent à repérer qui est concerné.')}
+    ${section("Icône de l'app", `<div class="logos">${[['a', 'Cœur'], ['b', 'Nous deux'], ['c', 'Nuit']].map(([l, n]) =>
+      `<button class="logo press ${(S.settings.logo || 'b') === l ? 'on' : ''}" data-a="pickLogo" data-v="${l}" aria-label="Logo ${n}"><img src="icons/icon-${l}-180.png" alt=""><span>${n}</span></button>`).join('')}</div>`,
+      "Sur iPhone, l'icône de l'écran d'accueil change seulement quand on remet l'app sur l'écran d'accueil.")}
     ${section('Apparence', `<div class="field col">${seg('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']], S.settings.theme || 'auto').replace('data-seg="theme"', 'data-seg="theme" data-a-seg="setTheme"')}</div>`)}
     ${section('Sauvegarde', `<button class="row press link-row" data-a="exportData" style="width:100%">${ic('download', 20)}<span class="main" style="text-align:left">Exporter mes données</span></button>
       <button class="row press link-row" data-a="importData" style="width:100%">${ic('upload', 20)}<span class="main" style="text-align:left">Importer une sauvegarde</span></button>`,
@@ -726,3 +730,11 @@ A.importData = async () => {
 };
 A.resetAll = () => dialog({ title: 'Tout effacer ?', text: 'Toutes les données de ce téléphone seront supprimées. Pensez à exporter avant.', ok: 'Effacer', danger: true, onOk: () => {
   S = defaults(); localStorage.removeItem(KEY); applyTheme(); UI.view = null; UI.tab = 'famille'; render(); } });
+
+A.pickLogo = d => {
+  if ((S.settings.logo || 'b') === d.v) return;
+  S.settings.logo = d.v; applyLogo(d.v); changed();
+  dialog({ title: 'Nouvelle icône choisie', ok: "J'ai compris",
+    onOk: () => {},
+    text: "Pour la voir sur l'écran d'accueil : 1. Réglages, Sauvegarde, Exporter (par sécurité). 2. Supprimez l'ancienne icône. 3. Dans Safari, Partager puis « Sur l'écran d'accueil ». 4. Si vos données ont disparu, Réglages, Importer." });
+};

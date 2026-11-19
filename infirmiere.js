@@ -118,7 +118,7 @@ function infToday() {
       <div class="row"><span style="color:var(--accent)">${ic('plus', 22, 2.2)}</span><input class="plain" id="ckInput" placeholder="Ajouter à la liste" enterkeyhint="done"></div></div>
       <div class="sec-f">La liste se remet à zéro chaque jour.</div></div>
     <div class="sec btnrow"><button class="btn glass press" data-a="extraAdd">${ic('clock', 18)}<span>Heures sup</span></button>
-      <button class="btn glass press" data-a="planShare">${ic('share', 18)}<span>Envoyer mon planning</span></button></div>`;
+      <button class="btn glass press" data-a="shareSchedule" data-v="infirmier">${ic('share', 18)}<span>Partager mon planning</span></button></div>`;
 }
 A.ckToggle = d => { const n = nurse(), c = n.checklist.find(x => x.id === d.id); if (!c) return; const tk = todayKey();
   remainingAfter(() => { c.doneDate = c.doneDate === tk ? null : tk; }, () => n.checklist.filter(x => x.doneDate !== tk).length); changed(); };
@@ -158,8 +158,8 @@ function infPlanning() {
       <div class="tile glass" style="padding:12px"><span class="lbl">Heures</span><b class="num" style="font-size:17px">${hoursLabel(st.hours)}</b></div>
       <div class="tile glass" style="padding:12px"><span class="lbl">Gardes</span><b class="num" style="font-size:17px">${st.gardes}</b></div>
       <div class="tile glass" style="padding:12px"><span class="lbl">Week-ends</span><b class="num" style="font-size:17px">${st.weekends}</b></div></div>
-    <div class="sec btnrow"><button class="btn glass press" data-a="planCopyWeek">${ic('undo', 18)}<span>Répéter une semaine</span></button>
-      <button class="btn glass press" data-a="planIcs">${ic('calendar', 18)}<span>Calendrier iPhone</span></button></div>
+    <div class="sec btnrow"><button class="btn glass press" data-a="planCopyWeek">${ic('undo', 18)}<span>Répéter</span></button>
+      <button class="btn glass press" data-a="shareSchedule" data-v="infirmier">${ic('share', 18)}<span>Partager</span></button></div>
     <div class="hint">★ jour férié. Les gardes s'affichent aussi dans l'agenda de l'onglet Famille.</div>`;
 }
 A.brush = d => { UI.brush = d.v; render(); };
