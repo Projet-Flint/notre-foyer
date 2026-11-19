@@ -43,30 +43,60 @@ function eventsOn(key) {
   return S.events.filter(e => e.start.slice(0, 10) === key)
     .sort((a, b) => (a.allDay ? -1 : 0) - (b.allDay ? -1 : 0) || a.start.localeCompare(b.start));
 }
+function datesOn(key) { const d = parseKey(key); return S.dates.filter(x => { const o = parseKey(x.date); return o.getMonth() === d.getMonth() && o.getDate() === d.getDate(); }); }
+function dayDots(k) {
+  const ev = eventsOn(k).slice(0, 3).map(e => `<i style="background:${H.color(e.who)}"></i>`);
+  if (datesOn(k).length) ev.push('<i style="background:var(--orange)"></i>');
+  return ev.slice(0, 4).join('');
+}
 function pageAgenda() {
-  const today = startOfDay(new Date());
-  if (daysBetween(today, parseKey(UI.day)) < 0 || daysBetween(today, parseKey(UI.day)) > 6) UI.day = todayKey();
-  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i));
-  const strip = `<div class="week">${days.map(d => {
-    const k = dkey(d), ev = eventsOn(k).slice(0, 3);
-    return `<button class="press ${k === UI.day ? 'on' : ''}" data-a="pickDay" data-v="${k}">
-      <span class="wd">${esc(d.toLocaleDateString('fr-FR', { weekday: 'short' }))}</span><span class="dn">${d.getDate()}</span>
-      <span class="dots">${ev.map(e => `<i style="background:${H.color(e.who)}"></i>`).join('')}</span></button>`;
-  }).join('')}</div>`;
+  const today = startOfDay(new Date()), sel = parseKey(UI.day);
+  const mode = UI.agendaMode || 'Semaine';
+  let top;
+  if (mode === 'Semaine') {
+    const off = daysBetween(today, sel);
+    const first = off >= 0 && off <= 6 ? today : weekStart(sel);
+    const days = Array.from({ length: 7 }, (_, i) => addDays(first, i));
+    top = section(first === today ? 'Cette semaine' : 'Semaine du ' + first.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }),
+      `<div class="week">${days.map(d => { const k = dkey(d); const sh = typeof shiftOn === 'function' ? shiftOn(k) : null;
+        return `<button class="press ${k === UI.day ? 'on' : ''}" data-a="pickDay" data-v="${k}">
+        <span class="wd">${esc(d.toLocaleDateString('fr-FR', { weekday: 'short' }))}</span><span class="dn">${d.getDate()}</span>
+        <span class="dots">${dayDots(k)}</span>${sh ? `<span class="shiftbar" style="background:${sh.color}"></span>` : ''}</button>`; }).join('')}</div>`);
+  } else {
+    const m = new Date(sel.getFullYear(), sel.getMonth(), 1), first = weekStart(m);
+    const weeks = Math.ceil((daysBetween(first, new Date(m.getFullYear(), m.getMonth() + 1, 1))) / 7);
+    const cells = Array.from({ length: weeks * 7 }, (_, i) => addDays(first, i));
+    top = `<div class="sec"><div class="glass card" style="padding:10px 10px 12px">
+      <div class="daynav" style="margin:0 0 6px"><button class="iconbtn press" data-a="agendaMonth" data-v="-1" aria-label="Mois précédent">${ic('back', 18, 2.2)}</button>
+        <button class="d press" data-a="agendaMonth" data-v="0">${esc(cap(m.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })))}</button>
+        <button class="iconbtn press" data-a="agendaMonth" data-v="1" aria-label="Mois suivant">${ic('chev', 18, 2.2)}</button></div>
+      <div class="month">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(x => `<span class="mh">${x}</span>`).join('')}
+      ${cells.map(d => { const k = dkey(d), out = d.getMonth() !== m.getMonth(); const sh = typeof shiftOn === 'function' ? shiftOn(k) : null;
+        return `<button class="mday press ${k === UI.day ? 'on' : ''} ${k === todayKey() ? 'today' : ''} ${out ? 'out' : ''}" data-a="pickDay" data-v="${k}" aria-label="${esc(longDate(d))}">
+          <span class="num">${d.getDate()}</span><span class="dots">${dayDots(k)}</span>${sh ? `<span class="shiftbar" style="background:${sh.color}" title="${esc(sh.label)}"></span>` : ''}</button>`; }).join('')}</div></div></div>`;
+  }
   const list = eventsOn(UI.day);
-  const rows = list.length ? list.map(e => swipeRow(
+  const sh = typeof shiftOn === 'function' ? shiftOn(UI.day) : null;
+  let rows = '';
+  if (sh) rows += `<div class="row"><span class="time">${sh.work ? esc(sh.start) : 'Repos'}</span><span class="vbar" style="background:${sh.color}"></span><div class="main"><div class="t">${esc(sh.label)}</div><div class="s">${sh.work ? esc(sh.start + ' – ' + sh.end) + ' · mon planning' : 'Mon planning'}</div></div>${chip(H.me)}</div>`;
+  rows += datesOn(UI.day).map(x => `<div class="row"><span class="time" style="color:var(--orange)">${ic('gift', 20)}</span><span class="vbar" style="background:var(--orange)"></span><div class="main"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.kind)}</div></div></div>`).join('');
+  rows += list.map(e => swipeRow(
     `<span class="time">${e.allDay ? 'Journée' : esc(e.start.slice(11, 16))}</span>
      <span class="vbar" style="background:${H.color(e.who)}"></span>
      <div class="main"><div class="t">${esc(e.title)}</div>${e.location ? `<div class="s">${esc(e.location)}</div>` : ''}</div>
      ${chip(e.who)}`,
     [{ a: 'eventIcs', id: e.id, icon: 'calendar', label: 'Calendrier', color: THEME.both }, swipeDel('eventDel', e.id)],
-    `data-long="eventMenu" data-id="${e.id}"`)).join('') : `<div class="empty">Rien de prévu ce jour-là.</div>`;
+    `data-long="eventMenu" data-id="${e.id}"`)).join('');
+  if (!rows) rows = `<div class="empty">Rien de prévu ce jour-là.</div>`;
   return `<div class="scroll">
-    ${section('Cette semaine', strip)}
-    ${section(esc(cap(dayLabel(parseKey(UI.day)))), rows)}
+    <div class="sec">${switcher(['Semaine', 'Mois'], mode, 'agendaMode', { key: 'agmode', cls: 'inline small' })}</div>
+    ${top}
+    ${section(esc(cap(dayLabel(sel))), rows)}
   </div>
   <button class="fab btn prim press halo" data-a="eventAdd" aria-label="Ajouter un rendez-vous">${ic('plus', 26, 2.2)}</button>`;
 }
+A.agendaMode = d => { UI.agendaMode = d.v; render(); };
+A.agendaMonth = d => { const n = +d.v; if (n === 0) UI.day = todayKey(); else { const s = parseKey(UI.day); UI.day = dkey(new Date(s.getFullYear(), s.getMonth() + n, 1)); } render(); };
 A.pickDay = d => { UI.day = d.v; render(); };
 A.eventDel = d => { S.events = S.events.filter(e => e.id !== d.id); changed(); };
 A.eventIcs = d => {

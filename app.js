@@ -27,7 +27,7 @@ setInterval(paintBackground, 300000);
 
 // ---------- Rendu ----------
 const scrollMemo = {};
-function screenKey() { return UI.view ? UI.view.name + ':' + (UI.view.id || '') : UI.tab + ':' + (UI.tab === 'travail' ? UI.work : ''); }
+function screenKey() { return UI.view ? UI.view.name + ':' + (UI.view.id || '') : UI.tab + ':' + (UI.tab === 'travail' ? UI.work + UI.nseg + jobOf(H.me) : ''); }
 function render(opts = {}) {
   // garder la position de défilement de chaque écran
   const prevKey = main.dataset.key;
@@ -37,7 +37,7 @@ function render(opts = {}) {
   document.documentElement.style.setProperty('--me', myColor);
   let html;
   if (UI.view) {
-    html = { reglages: viewReglages, eleve: viewEleve, bilan: viewBilan, types: viewTypes, projet: viewProjet }[UI.view.name]();
+    html = { reglages: viewReglages, eleve: viewEleve, bilan: viewBilan, types: viewTypes, projet: viewProjet, shifts: viewShifts }[UI.view.name]();
   } else {
     html = { accueil: screenAccueil, famille: screenFamille, finances: screenFinances, travail: screenTravail, projets: screenProjets }[UI.tab]();
   }

@@ -51,6 +51,7 @@ function screenAccueil() {
         <button class="tile glass press" data-a="goCourses" style="text-align:left"><span class="lbl">Courses</span><span class="big">${shopN}</span><span class="lbl">article${shopN > 1 ? 's' : ''} à acheter</span></button>
         <button class="tile glass press" data-a="${meals ? 'openMeals' : 'goTabWork'}" style="text-align:left">${meals
           ? `<span class="lbl">Dîner ce soir</span><span style="font-weight:700;font-size:17px">${esc(meals.title || '…')}</span><span class="lbl">Repas de la semaine</span>`
+          : jobOf(H.me) === 'infirmier' ? (s => s ? `<span class="lbl">Ma garde aujourd'hui</span><span style="font-weight:800;font-size:20px;color:${s.color}">${esc(s.label)}</span><span class="lbl">${s.work && s.start ? esc(s.start + ' – ' + s.end) : 'Pas de travail'}</span>` : `<span class="lbl">Ma garde aujourd'hui</span><span style="font-weight:700;font-size:15px">Rien de prévu</span><span class="lbl">Remplir mon planning</span>`)(shiftOn(tk))
           : `<span class="lbl">Travail aujourd'hui</span><span class="big">${hoursLabel(lessonsToday.h + workedSeconds(startOfDay(now), addDays(startOfDay(now), 1)) / 3600)}</span><span class="lbl">${lessonsToday.n} leçon${lessonsToday.n > 1 ? 's' : ''}</span>`}</button>
       </div>
       ${soon.length ? `<div class="sec"><div class="glass card" style="padding:14px 16px 6px">${cardHead('Dates à venir', 'Voir tout', 'goDates')}
@@ -68,6 +69,9 @@ A.goDates = () => { UI.tab = 'famille'; UI.section = 'Dates'; UI.view = null; re
 const WORK_SEGS = ["Aujourd'hui", 'Horaires', 'Élèves', 'Notes'];
 const PRIOS = { Haute: ['rgba(184,58,43,.14)', '#B5392A'], Moyenne: ['rgba(183,121,31,.16)', '#93600F'], Basse: ['rgba(20,60,50,.1)', 'var(--text2)'] };
 function screenTravail() {
+  const job = jobOf(H.me);
+  if (job === 'infirmier') return screenTravailInf();
+  if (job === 'autre') return screenTravailSimple();
   const seg = UI.work;
   const lock = `<span class="lock glass">${ic('lock', 14, 2)}Visible par vous seul</span>`;
   let body = '', fabHtml = '';
@@ -94,7 +98,7 @@ function workToday() {
   const notes = S.work.notes.slice().sort((a, b) => b.at - a.at).slice(0, 2);
   return `<div class="sec"><div class="glass card" style="padding:14px 16px;display:flex;align-items:center;gap:14px">
       <div style="flex:1;min-width:0"><div class="lbl" style="font-weight:600">Temps travaillé aujourd'hui</div>
-        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="num" style="font-size:28px;font-weight:800;letter-spacing:-.02em">${hoursLabel(todayH)}</span><button class="press" data-a="openBilan" style="font-size:12.5px;font-weight:700;color:var(--accent)">Bilan du mois ›</button></div>
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="num" style="font-size:28px;font-weight:800;letter-spacing:-.02em">${hoursLabel(todayH)}</span>${jobOf(H.me) === 'cours' ? '<button class="press" data-a="openBilan" style="font-size:12.5px;font-weight:700;color:var(--accent)">Bilan du mois ›</button>' : ''}</div>
         ${lessonH ? `<div class="lbl">dont ${hoursLabel(lessonH)} de leçons</div>` : ''}
         <div class="days5">${week.map(x => { const isT = dkey(x.d) === tk; return `<div><i style="height:${Math.max(4, 30 * x.h / maxH)}px;background:${isT ? H.color(H.me) : x.h ? rgba(H.color(H.me), .45) : 'var(--sep)'}"></i><span style="font-size:10px;${isT ? 'font-weight:700' : 'color:var(--text2)'}">${x.d.toLocaleDateString('fr-FR', { weekday: 'narrow' })}</span></div>`; }).join('')}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
@@ -253,6 +257,7 @@ A.typeDel = () => { const t = typeById(UI.view.sel);
 document.addEventListener('change', e => {
   const b = e.target.dataset && e.target.dataset.bind; if (!b) return;
   const [obj, field] = b.split('.');
+  if (obj === 'shift') return;
   let v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
   if (obj === 'type') {
     const t = typeById(UI.view.sel);
@@ -653,7 +658,9 @@ function renamePerson(field, v) {
   const rep = x => x === old ? v : x;
   S.settings[field] = v;
   if (S.settings.me === old) S.settings.me = v;
-  for (const k of ['colors', 'photos']) if (S.settings[k][old] != null) { S.settings[k][v] = S.settings[k][old]; delete S.settings[k][old]; }
+  S.settings.jobs = S.settings.jobs || {};
+  if (!S.settings.jobs[old]) S.settings.jobs[old] = jobOf(old);
+  for (const k of ['colors', 'photos', 'jobs']) if (S.settings[k][old] != null) { S.settings[k][v] = S.settings[k][old]; delete S.settings[k][old]; }
   S.events.forEach(e => e.who = rep(e.who)); S.chores.forEach(c => c.who = rep(c.who));
   S.projects.forEach(p => { p.who = rep(p.who); p.steps.forEach(s => s.who = rep(s.who)); });
   S.fin.expenses.forEach(e => e.paidBy = rep(e.paidBy));
@@ -674,6 +681,8 @@ function viewReglages() {
       <div class="field"><span class="flabel">Prénom 2</span><input data-bind="settings.person2" value="${esc(H.p2)}" style="text-align:right"></div>
       <div class="field col"><span class="flabel">Ce téléphone est celui de</span>${seg('me', [H.p1, H.p2], H.me, n => H.color(n)).replace('data-seg="me"', 'data-seg="me" data-a-seg="setMe"')}</div>`,
       'L\'onglet choisi et les boutons prennent la couleur de la personne à qui appartient ce téléphone.')}
+    ${section('Métier', [H.p1, H.p2].map(n => `<div class="field"><span class="flabel">${esc(n)}</span><select data-job="${esc(n)}">${JOBS.map(([v, l]) => `<option value="${v}" ${jobOf(n) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`).join(''),
+      'L\'onglet Travail s\'adapte au métier de la personne à qui appartient ce téléphone : leçons et élèves, planning de gardes d\'infirmière, ou une journée simple avec priorités et notes.')}
     ${section('Couleurs', colorRow(H.p1) + colorRow(H.p2) + colorRow(BOTH), 'Touchez le rond pour choisir une photo. Photo et couleur servent à repérer qui est concerné.')}
     ${section('Apparence', `<div class="field col">${seg('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']], S.settings.theme || 'auto').replace('data-seg="theme"', 'data-seg="theme" data-a-seg="setTheme"')}</div>`)}
     ${section('Sauvegarde', `<button class="row press link-row" data-a="exportData" style="width:100%">${ic('download', 20)}<span class="main" style="text-align:left">Exporter mes données</span></button>
@@ -694,6 +703,10 @@ document.addEventListener('input', e => {
   const name = e.target.dataset && e.target.dataset.color; if (!name) return;
   S.settings.colors[name] = e.target.value.toUpperCase(); save();
   clearTimeout(window._colTimer); window._colTimer = setTimeout(() => render(), 250);
+});
+document.addEventListener('change', e => {
+  const n = e.target.dataset && e.target.dataset.job; if (!n) return;
+  S.settings.jobs = S.settings.jobs || {}; S.settings.jobs[n] = e.target.value; haptic(); changed(); toast('Onglet Travail adapté');
 });
 A.colorSet = (d, el) => { S.settings.colors[d.v] = el.dataset.c; haptic(); changed(); };
 A.colorReset = d => { delete S.settings.colors[d.v]; changed(); };
