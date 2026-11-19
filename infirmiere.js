@@ -270,3 +270,6 @@ function screenTravailSimple() {
     ${switcher(["Aujourd'hui", 'Notes'], seg, 'workSeg', { key: 'works' })}
     <div class="scroll">${seg === 'Notes' ? workNotes() : workToday()}</div>${fab(seg === 'Notes' ? 'noteAdd' : 'workAdd', 'Ajouter')}</div>`;
 }
+
+/** La personne du foyer qui a le planning de gardes (moi en priorité). */
+function nurseName() { return jobOf(H.me) === 'infirmier' ? H.me : [H.p1, H.p2].find(n => jobOf(n) === 'infirmier') || H.me; }

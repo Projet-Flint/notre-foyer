@@ -79,7 +79,7 @@ function pageAgenda() {
   const list = eventsOn(UI.day);
   const sh = typeof shiftOn === 'function' ? shiftOn(UI.day) : null;
   let rows = '';
-  if (sh) rows += `<div class="row"><span class="time">${sh.work ? esc(sh.start) : 'Repos'}</span><span class="vbar" style="background:${sh.color}"></span><div class="main"><div class="t">${esc(sh.label)}</div><div class="s">${sh.work ? esc(sh.start + ' – ' + sh.end) + ' · mon planning' : 'Mon planning'}</div></div>${chip(H.me)}</div>`;
+  if (sh) rows += `<div class="row"><span class="time">${sh.work ? esc(sh.start) : 'Repos'}</span><span class="vbar" style="background:${sh.color}"></span><div class="main"><div class="t">${esc(sh.label)}</div><div class="s">${sh.work ? esc(sh.start + ' – ' + sh.end) + ' · ' : ''}${nurseName() === H.me ? 'mon planning' : 'planning de ' + esc(nurseName())}</div></div>${chip(nurseName())}</div>`;
   rows += datesOn(UI.day).map(x => `<div class="row"><span class="time" style="color:var(--orange)">${ic('gift', 20)}</span><span class="vbar" style="background:var(--orange)"></span><div class="main"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.kind)}</div></div></div>`).join('');
   rows += list.map(e => swipeRow(
     `<span class="time">${e.allDay ? 'Journée' : esc(e.start.slice(11, 16))}</span>

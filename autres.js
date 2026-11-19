@@ -687,6 +687,8 @@ function viewReglages() {
     ${section('Métier', [H.p1, H.p2].map(n => `<div class="field"><span class="flabel">${esc(n)}</span><select data-job="${esc(n)}">${JOBS.map(([v, l]) => `<option value="${v}" ${jobOf(n) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`).join(''),
       'L\'onglet Travail s\'adapte au métier de la personne à qui appartient ce téléphone : leçons et élèves, planning de gardes d\'infirmière, ou une journée simple avec priorités et notes.')}
     ${section('Couleurs', colorRow(H.p1) + colorRow(H.p2) + colorRow(BOTH), 'Touchez le rond pour choisir une photo. Photo et couleur servent à repérer qui est concerné.')}
+    ${lockSettingsHtml()}
+    ${syncSettingsHtml()}
     ${section("Icône de l'app", `<div class="logos">${[['a', 'Cœur'], ['b', 'Nous deux'], ['c', 'Nuit']].map(([l, n]) =>
       `<button class="logo press ${(S.settings.logo || 'b') === l ? 'on' : ''}" data-a="pickLogo" data-v="${l}" aria-label="Logo ${n}"><img src="icons/icon-${l}-180.png" alt=""><span>${n}</span></button>`).join('')}</div>`,
       "Sur iPhone, l'icône de l'écran d'accueil change seulement quand on remet l'app sur l'écran d'accueil.")}
