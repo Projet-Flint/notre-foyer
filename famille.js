@@ -17,7 +17,8 @@ function screenFamille() {
   const idx = SECTIONS.indexOf(UI.section);
   return `<div class="screen">
     <div class="head"><div><h1>Famille</h1></div>
-      <button class="iconbtn glass press" data-a="openSettings" aria-label="Réglages">${ic('gear', 22)}</button></div>
+      <div style="display:flex;gap:8px"><button class="iconbtn glass press" data-a="openSearch" aria-label="Rechercher">${ic('search', 21)}</button>
+      <button class="iconbtn glass press" data-a="openSettings" aria-label="Réglages">${ic('gear', 22)}</button></div></div>
     ${switcher(SECTIONS, UI.section, 'section', { key: 'famille', cls: 'six' })}
     <div class="pager" data-pager>
       <div class="pages" style="transform:translateX(${-idx * 100}%)">
@@ -141,7 +142,8 @@ function eventSheet(e) {
 function pageCourses() {
   const open = S.shopping.filter(x => !x.done), cart = S.shopping.filter(x => x.done);
   let html = `<div class="sec"><div class="group glass"><div class="row">
-      <input class="plain" id="shopInput" placeholder="Ajouter un article" enterkeyhint="done" autocomplete="off">
+      <input class="plain" id="shopInput" placeholder="Ajouter : lait, œufs et pain" enterkeyhint="done" autocomplete="off">
+      <button class="press micbtn" data-a="shopDictate" aria-label="Dicter les courses">${ic('mic', 22)}</button>
       <button class="press" data-a="shopAdd" style="color:var(--accent)" aria-label="Ajouter">${ic('plus', 26, 2.4)}</button></div></div></div>
     <div class="sec"><div class="btnrow">
       <button class="btn glass press" data-a="openMeals">${ic('fork', 18)}<span>Repas de la semaine</span></button>

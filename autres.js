@@ -42,8 +42,9 @@ function screenAccueil() {
         ${proj.goal ? `<div class="progress"><i style="width:${Math.min(100, 100 * (proj.saved || 0) / proj.goal)}%;background:${THEME.both}"></i></div><span class="lbl">${eur(proj.saved || 0)} sur ${eur(proj.goal)}</span>` : `<span class="lbl">${Math.round(100 * projectProgress(proj))} % fait</span>`}</button>`
     : `<button class="tile glass press" data-a="goTab" data-v="projets" style="text-align:left"><span class="lbl">Prochain projet</span><span style="font-weight:700;font-size:15px">Aucun pour l'instant</span><span class="lbl">Le compte à rebours s'affichera ici</span></button>`;
 
-  return `<div class="screen">${head('Bonjour ' + H.me, cap(longDate(now)), `<button class="press" data-a="openSettings" aria-label="Réglages" style="display:flex">${avatar(H.p1, 36)}<span style="margin-left:-10px">${avatar(H.p2, 36)}</span></button>`)}
+  return `<div class="screen">${head('Bonjour ' + H.me, cap(longDate(now)), `<div style="display:flex;gap:10px;align-items:center"><button class="iconbtn glass press" data-a="openSearch" aria-label="Rechercher">${ic('search', 21)}</button><button class="press" data-a="openSettings" aria-label="Réglages" style="display:flex">${avatar(H.p1, 36)}<span style="margin-left:-10px">${avatar(H.p2, 36)}</span></button></div>`)}
     <div class="scroll">
+      ${showRecapCard() ? recapCardHtml() : ''}
       <div class="sec"><div class="glass card" style="padding:14px 16px 6px">${cardHead('Agenda du jour', 'Voir tout', 'goAgenda')}${evRows}</div></div>
       <div class="sec"><div class="glass card" style="padding:14px 16px 6px">${cardHead('Tâches du jour', todo.length ? `${doneN} sur ${todo.length} faites` : 'Voir tout', 'goTaches')}${taskRows}</div></div>
       <div class="sec grid2">${tiles}</div>
@@ -56,6 +57,7 @@ function screenAccueil() {
       </div>
       ${soon.length ? `<div class="sec"><div class="glass card" style="padding:14px 16px 6px">${cardHead('Dates à venir', 'Voir tout', 'goDates')}
         ${soon.slice(0, 3).map(({ d, n }) => { const k = daysBetween(now, n); return `<div class="row" style="padding:8px 0"><span style="width:44px;font-weight:800;color:var(--orange)" class="num">${k === 0 ? 'Auj.' : 'J-' + k}</span><span class="main t">${esc(d.title)}</span><span class="lbl">${esc(n.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }))}</span></div>`; }).join('')}</div></div>` : ''}
+      ${showRecapCard() ? '' : recapCardHtml()}
     </div></div>`;
 }
 A.goTab = d => { UI.tab = d.v; UI.view = null; render(); };

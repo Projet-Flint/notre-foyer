@@ -1,6 +1,6 @@
 // Garde l'app disponible hors connexion. Changer VERSION à chaque mise à jour.
-const VERSION = 'notrefoyer-v5';
-const FILES = ['./', 'index.html', 'app.css', 'store.js', 'ui.js', 'famille.js', 'autres.js', 'infirmiere.js', 'partage.js', 'app.js',
+const VERSION = 'notrefoyer-v6';
+const FILES = ['./', 'index.html', 'app.css', 'store.js', 'ui.js', 'famille.js', 'autres.js', 'infirmiere.js', 'partage.js', 'idees.js', 'app.js',
   'manifest.webmanifest', 'manifest-a.webmanifest', 'manifest-b.webmanifest', 'manifest-c.webmanifest',
   'icons/icon-a-180.png', 'icons/icon-a-192.png', 'icons/icon-a-512.png', 'icons/icon-b-180.png', 'icons/icon-b-192.png', 'icons/icon-b-512.png',
   'icons/icon-c-180.png', 'icons/icon-c-192.png', 'icons/icon-c-512.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
