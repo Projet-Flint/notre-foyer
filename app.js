@@ -186,4 +186,4 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { ap
 applyTheme();
 applyAutoSavings();
 render();
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
