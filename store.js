@@ -79,8 +79,10 @@ function hexToRgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 1
 function rgbToHex(r, g, b) { return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase(); }
 function mix(a, b, t) { const x = hexToRgb(a), y = hexToRgb(b); return rgbToHex(x[0] + (y[0] - x[0]) * t, x[1] + (y[1] - x[1]) * t, x[2] + (y[2] - x[2]) * t); }
 function rgba(h, a) { const [r, g, b] = hexToRgb(h); return `rgba(${r},${g},${b},${a})`; }
-function selVars(c) { return `--c:${c};--c-light:${mix(c, '#FFFFFF', .35)};--c-dark:${mix(c, '#000000', .22)};--c-shadow:${rgba(c, .4)}`; }
-function grad(c) { return `linear-gradient(150deg,${mix(c, '#FFFFFF', .35)},${c} 55%,${mix(c, '#000000', .22)})`; }
+// Couleurs pleines rendues translucides (verre teinté) : GLASS_ALPHA règle la transparence.
+const GLASS_ALPHA = 0.66;
+function selVars(c) { const a = GLASS_ALPHA; return `--c:${rgba(c, a)};--c-light:${rgba(mix(c, '#FFFFFF', .35), a)};--c-dark:${rgba(mix(c, '#000000', .22), a + .08)};--c-shadow:${rgba(c, .3)}`; }
+function grad(c) { const a = GLASS_ALPHA; return `linear-gradient(150deg,${rgba(mix(c, '#FFFFFF', .35), a)},${rgba(c, a)} 55%,${rgba(mix(c, '#000000', .22), a + .08)})`; }
 
 // ---------- Dates ----------
 const pad = n => String(n).padStart(2, '0');
