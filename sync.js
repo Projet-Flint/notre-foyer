@@ -4,7 +4,10 @@
 // ce qui a changé ailleurs est appliqué ici. En cas de modification des deux côtés, la dernière arrivée gagne.
 'use strict';
 
-const FIREBASE_CONFIG = null; // ← rempli avec le bloc firebaseConfig du foyer
+const FIREBASE_CONFIG = { // espace Firebase du foyer (ces valeurs ne sont pas secrètes, l'accès est protégé par les règles)
+  apiKey: 'AIzaSyC-KlQmdvyFsxJjE0cbw6_u7TRDN0nn7GU', authDomain: 'notre-foyer-cba85.firebaseapp.com', projectId: 'notre-foyer-cba85',
+  storageBucket: 'notre-foyer-cba85.firebasestorage.app', messagingSenderId: '75161031746', appId: '1:75161031746:web:b3489ab5f4a4e9d46149db',
+};
 const FB_VER = '10.12.2';
 const SYNC_KEY = 'notrefoyer.sync';
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -59,7 +62,7 @@ const docId = key => key.replace(/\//g, '_');
 // ---------- Firebase ----------
 async function fbLoad() {
   if (SYNC.fb) return SYNC.fb;
-  const base = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
+  const base = new URL('vendor/firebase/', location.href).href; // Firebase 10.12.2, copié dans l'app
   const [app, auth, fs] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(base + f)));
   const a = app.initializeApp(FIREBASE_CONFIG), au = auth.getAuth(a);
   await auth.signInAnonymously(au);
