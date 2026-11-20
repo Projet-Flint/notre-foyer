@@ -143,11 +143,11 @@ function workHoraires() {
   const sd = st(d0, d1), ws = weekStart(day), sw = st(ws, addDays(ws, 7)), [ma, mb] = monthRange(day), sm = st(ma, mb);
   const isToday = UI.workDay === todayKey();
   const lessons = lessonsBetween(d0, d1);
-  const S0 = w.dayStart, E0 = w.dayEnd, ROW = 34;
+  const S0 = w.dayStart, E0 = w.dayEnd, ROW = 48;
   const hours = []; for (let h = S0; h < E0; h++) hours.push(h);
   const blocks = lessons.map(l => { const t = typeById(l.type), s = new Date(l.start), h = s.getHours() + s.getMinutes() / 60, moving = UI.moveLesson === l.id;
     const stu = l.student ? S.work.students.find(x => x.id === l.student) : null;
-    return `<button class="block pop ${moving ? 'moving' : ''}" data-a="lessonMenu" data-id="${l.id}" style="top:${14 + (h - S0) * ROW + 2}px;height:${Math.max(18, t.dur * ROW - 4)}px;background:${grad(t.color)}">
+    return `<button class="block pop ${moving ? 'moving' : ''} ${t.dur <= 0.5 ? 'short' : ''}" data-a="lessonMenu" data-id="${l.id}" style="top:${14 + (h - S0) * ROW + 2}px;height:${Math.max(18, t.dur * ROW - 4)}px;background:${grad(t.color)}">
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stu ? stu.name : t.full)}</span><small>${fmtH(h)} – ${fmtH(h + t.dur)}${l.note ? ' · ' + esc(l.note) : ''}</small></button>`; }).join('');
   const now = new Date(), nowH = now.getHours() + now.getMinutes() / 60;
   const link = UI.linkStudent && S.work.students.find(x => x.id === UI.linkStudent);
@@ -163,12 +163,12 @@ function workHoraires() {
     <div class="types">${w.types.map(t => { const on = t.id === UI.selType;
       return `<button class="type press ${on ? 'on' : ''}" data-a="pickType" data-id="${t.id}" style="${on ? `background:${grad(t.color)};box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 14px ${rgba(t.color, .4)}` : ''}"><span>${esc(t.label)}</span><small>${durLabel(t.dur)} · ${t.rate} €/h</small></button>`; }).join('')}</div>
     <div class="planning glass" style="margin-top:12px">
-      ${hours.map(h => `<button class="hour" data-a="hourTap" data-v="${h}" aria-label="Ajouter à ${h} h"><span>${h}:00</span></button>`).join('')}
+      ${hours.map(h => `<button class="hour" data-a="hourTap" data-v="${h}" aria-label="Ajouter à ${h} h"><span>${h}:00</span></button><button class="hour half" data-a="hourTap" data-v="${h + .5}" aria-label="Ajouter à ${h} h 30"><span>${h}:30</span></button>`).join('')}
       ${isToday && nowH >= S0 && nowH <= E0 ? `<div class="nowline" style="top:${14 + (nowH - S0) * ROW}px"></div>` : ''}
       ${blocks}
     </div>
     <div class="sec btnrow" style="margin-top:12px"><button class="btn glass press" data-a="shareSchedule" data-v="cours">${ic('share', 18)}<span>Partager mes horaires</span></button></div>
-    <div class="hint">Touchez le haut d'une case pour l'heure pile, le bas pour la demie. Touchez une leçon pour la lier à un élève ou la retirer.</div>`;
+    <div class="hint">Touchez une ligne pour poser la leçon à l'heure pile ou à la demie. Touchez une leçon pour la modifier, ou gardez le doigt dessus pour la glisser.</div>`;
 }
 A.workDay = d => { const n = +d.v; UI.workDay = n === 0 ? todayKey() : dkey(addDays(parseKey(UI.workDay), n)); render(); };
 A.pickType = d => { UI.selType = d.id; render(); };
@@ -196,7 +196,6 @@ function withStudent(t, cb) {
 A.hourTap = (d, el, ev) => {
   let h = +d.v;
   const r = el.getBoundingClientRect();
-  if (ev && ev.clientY - r.top > r.height / 2) h += .5;
   if (UI.moveLesson) { const l = S.work.lessons.find(x => x.id === UI.moveLesson); UI.moveLesson = null; if (l) moveLesson(l, parseKey(UI.workDay), h); else render(); return; }
   const t = typeById(UI.selType);
   if (h + t.dur > S.work.dayEnd + 1e-6) { toast('Trop tard pour un ' + t.full.toLowerCase()); return; }
@@ -255,7 +254,7 @@ A.lessonMenu = d => {
 
 // ----- Personnaliser mes cours -----
 A.openTypes = () => { UI.view = { name: 'types', sel: UI.selType }; render(); };
-const DURS = [[0.75, '45 min'], [1, '1 h'], [1.5, '1 h 30'], [2, '2 h'], [3, '3 h']];
+const DURS = [[0.5, '30 min'], [0.75, '45 min'], [1, '1 h'], [1.5, '1 h 30'], [2, '2 h'], [3, '3 h']];
 function viewTypes() {
   const w = S.work; let t = w.types.find(x => x.id === UI.view.sel) || w.types[0];
   if (t) UI.view.sel = t.id;
@@ -792,7 +791,7 @@ document.addEventListener('pointermove', e => {
   const d = LESSON_DRAG; if (!d.el) return;
   if (d.timer && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 8) { clearTimeout(d.timer); d.timer = null; d.el = null; return; }
   if (!d.on) return;
-  const ROW = 34, w = S.work;
+  const ROW = 48, w = S.work;
   let h = d.h0 + (e.clientY - d.y0) / ROW;
   h = Math.max(w.dayStart, Math.min(w.dayEnd - d.dur, Math.round(h * 4) / 4));
   if (h !== d.h) { if (d.h !== undefined) haptic(); d.h = h; }

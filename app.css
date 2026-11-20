@@ -289,7 +289,7 @@ svg { flex: none; display: block; }
 .fav { flex: 1; min-width: 0; height: 44px; border-radius: 22px; border: 1px solid rgba(10,40,30,.4); color: #fff; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 12px rgba(20,40,35,.18); position: relative; padding: 0 8px; }
 .fav span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .planning { position: relative; padding: 14px 8px 8px 12px; border-radius: 24px; }
-.hour { display: flex; align-items: flex-start; height: 34px; border-top: 1px solid var(--sep); width: 100%; font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; }
+.hour { display: flex; align-items: flex-start; height: 24px; border-top: 1px solid var(--sep); width: 100%; font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; }
 .hour span { width: 40px; margin-top: -8px; }
 .block { position: absolute; left: 56px; right: 10px; border-radius: 12px; padding: 5px 10px; color: #fff; font-size: 12.5px; font-weight: 700; border: 1px solid rgba(10,40,30,.35);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 12px rgba(20,40,35,.18); display: flex; justify-content: space-between; gap: 6px; overflow: hidden; text-align: left; }
@@ -399,3 +399,6 @@ svg { flex: none; display: block; }
 .menu .title { white-space: pre-line; }
 .block { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .block.dragging { z-index: 5; transition: none; box-shadow: 0 12px 28px rgba(0,0,0,.28); scale: 1.03; }
+.hour.half { border-top: 1px dashed color-mix(in srgb, var(--sep) 70%, transparent); }
+.hour.half span { font-size: 9.5px; font-weight: 500; opacity: .55; }
+.block.short { padding-top: 0; padding-bottom: 0; align-items: center; line-height: 1.1; }
