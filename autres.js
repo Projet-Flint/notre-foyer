@@ -145,10 +145,10 @@ function workHoraires() {
   const lessons = lessonsBetween(d0, d1);
   const S0 = w.dayStart, E0 = w.dayEnd, ROW = 34;
   const hours = []; for (let h = S0; h < E0; h++) hours.push(h);
-  const blocks = lessons.map(l => { const t = typeById(l.type), s = new Date(l.start), h = s.getHours() + s.getMinutes() / 60;
+  const blocks = lessons.map(l => { const t = typeById(l.type), s = new Date(l.start), h = s.getHours() + s.getMinutes() / 60, moving = UI.moveLesson === l.id;
     const stu = l.student ? S.work.students.find(x => x.id === l.student) : null;
-    return `<button class="block pop" data-a="lessonMenu" data-id="${l.id}" style="top:${14 + (h - S0) * ROW + 2}px;height:${Math.max(18, t.dur * ROW - 4)}px;background:${grad(t.color)}">
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stu ? stu.name : t.full)}</span><small>${fmtH(h)} – ${fmtH(h + t.dur)}</small></button>`; }).join('');
+    return `<button class="block pop ${moving ? 'moving' : ''}" data-a="lessonMenu" data-id="${l.id}" style="top:${14 + (h - S0) * ROW + 2}px;height:${Math.max(18, t.dur * ROW - 4)}px;background:${grad(t.color)}">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stu ? stu.name : t.full)}</span><small>${fmtH(h)} – ${fmtH(h + t.dur)}${l.note ? ' · ' + esc(l.note) : ''}</small></button>`; }).join('');
   const now = new Date(), nowH = now.getHours() + now.getMinutes() / 60;
   const link = UI.linkStudent && S.work.students.find(x => x.id === UI.linkStudent);
   return `<div class="daynav"><button class="iconbtn glass press" data-a="workDay" data-v="-1" aria-label="Jour précédent">${ic('back', 18, 2.2)}</button>
@@ -157,6 +157,7 @@ function workHoraires() {
     <div class="glass" style="border-radius:20px;padding:10px 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
       ${[[isToday ? "Aujourd'hui" : 'Ce jour', sd], ['Semaine', sw], [cap(monthName(day)), sm]].map(([l, s], i) => `<div style="${i ? 'border-left:1px solid var(--sep);padding-left:10px' : ''}"><div class="lbl" style="font-weight:600">${l}</div><div style="font-size:17px;font-weight:800" class="num">${hoursLabel(s.h)}</div><div style="font-size:13px;font-weight:700;color:var(--accent)" class="num">${eur(Math.round(s.e))}</div></div>`).join('')}</div>
     ${w.types.some(t => t.fav) ? `<div style="display:flex;gap:8px;margin-top:10px">${w.types.filter(t => t.fav).map(t => `<button class="fav press" data-a="lessonNow" data-id="${t.id}" style="background:${grad(t.color)}">${ic('star', 15)}<span>${esc(t.label)} maintenant</span></button>`).join('')}</div>` : ''}
+    ${UI.moveLesson ? `<div class="banner glass" style="margin-top:10px">${ic('swap', 18)}<span style="flex:1">Touchez la nouvelle heure. Les flèches changent de jour.</span><button class="press" data-a="cancelMove" style="color:var(--accent);font-weight:600">Annuler</button></div>` : ''}
     ${link ? `<div class="banner glass" style="margin-top:10px">${ic('person', 18)}<span style="flex:1">Touchez une heure pour la leçon de <b>${esc(link.name)}</b>.</span><button class="press" data-a="cancelLink" style="color:var(--accent);font-weight:600">Annuler</button></div>` : ''}
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 4px 8px"><b style="font-size:14px">1. Choisissez · 2. Touchez une heure</b><button class="lbl press" data-a="openTypes" style="font-weight:700;color:var(--accent)">Personnaliser</button></div>
     <div class="types">${w.types.map(t => { const on = t.id === UI.selType;
@@ -193,9 +194,11 @@ function withStudent(t, cb) {
     .concat([{ label: 'Sans élève', fn: () => cb(null) }]));
 }
 A.hourTap = (d, el, ev) => {
-  const t = typeById(UI.selType); let h = +d.v;
+  let h = +d.v;
   const r = el.getBoundingClientRect();
   if (ev && ev.clientY - r.top > r.height / 2) h += .5;
+  if (UI.moveLesson) { const l = S.work.lessons.find(x => x.id === UI.moveLesson); UI.moveLesson = null; if (l) moveLesson(l, parseKey(UI.workDay), h); else render(); return; }
+  const t = typeById(UI.selType);
   if (h + t.dur > S.work.dayEnd + 1e-6) { toast('Trop tard pour un ' + t.full.toLowerCase()); return; }
   if (clash(h, t.dur, parseKey(UI.workDay))) { toast('Ce créneau est déjà pris'); return; }
   withStudent(t, stu => addLesson(t, h, parseKey(UI.workDay), stu));
@@ -206,11 +209,40 @@ A.lessonNow = d => {
   UI.workDay = todayKey();
   withStudent(t, stu => addLesson(t, h, now, stu));
 };
+A.cancelMove = () => { UI.moveLesson = null; render(); };
+/** Place une leçon à un autre jour / une autre heure, si le créneau est libre. */
+function moveLesson(l, day, h) {
+  const t = typeById(l.type);
+  if (h + t.dur > S.work.dayEnd + 1e-6 || h < S.work.dayStart - 1e-6) { toast('En dehors de vos horaires de la journée'); render(); return false; }
+  if (clash(h, t.dur, day, l.id)) { toast('Ce créneau est déjà pris'); render(); return false; }
+  const d = startOfDay(day); d.setMinutes(Math.round(h * 60)); l.start = d.toISOString();
+  haptic('success'); toast(`Déplacée ${dkey(d) === todayKey() ? "aujourd'hui" : 'le ' + d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric' })} à ${fmtH(h)}`); changed(); return true;
+}
+function lessonEdit(l) {
+  const t0 = typeById(l.type), s = new Date(l.start);
+  sheet({ title: 'Modifier la leçon', ok: 'OK',
+    body: `<div class="group glass">
+      <div class="field"><span class="flabel">Jour</span><input type="date" name="day" value="${dkey(s)}"></div>
+      <div class="field"><span class="flabel">Heure</span><input type="time" name="time" step="900" value="${hm(s)}"></div>
+      <div class="field"><span class="flabel">Type</span><select name="type">${S.work.types.map(x => `<option value="${x.id}" ${x.id === t0.id ? 'selected' : ''}>${esc(x.full)} (${durLabel(x.dur)})</option>`).join('')}</select></div></div>
+      <div class="sec"><div class="group glass"><div class="field col"><span class="flabel">Note</span><textarea name="note" rows="3" placeholder="Ex. apporter la partition, payé en espèces…">${esc(l.note || '')}</textarea></div></div></div>`,
+    onOk: r => {
+      const day = parseKey(val(r, 'day') || dkey(s)), [hh, mm] = (val(r, 'time') || hm(s)).split(':').map(Number), h = hh + mm / 60;
+      const old = l.type; l.type = val(r, 'type') || old;
+      if (!moveLesson(l, day, h)) { l.type = old; return false; }
+      l.note = val(r, 'note').trim() || undefined; if (!l.note) delete l.note; changed();
+    } });
+}
 A.lessonMenu = d => {
   const l = S.work.lessons.find(x => x.id === d.id); if (!l) return;
+  if (UI.moveLesson === l.id) { UI.moveLesson = null; render(); return; }
   const t = typeById(l.type), s = new Date(l.start);
   const stu = l.student && S.work.students.find(x => x.id === l.student);
-  menu(`${t.full} · ${hm(s)}${stu ? ' · ' + stu.name : ''}`, [
+  menu(`${t.full} · ${hm(s)}${stu ? ' · ' + stu.name : ''}${l.note ? '\n' + l.note : ''}`, [
+    { label: 'Modifier (heure, jour, note)', icon: 'pencil', fn: () => lessonEdit(l) },
+    { label: 'Déplacer', icon: 'swap', fn: () => { UI.moveLesson = l.id; UI.linkStudent = null; render(); toast('Touchez la nouvelle heure'); } },
+    { label: l.note ? 'Changer la note' : 'Ajouter une note', icon: 'note', fn: () => dialog({ title: 'Note sur la leçon', placeholder: 'Votre note', value: l.note || '', ok: 'OK',
+      onOk: v => { if (v) l.note = v; else delete l.note; changed(); } }) },
     { label: stu ? 'Changer d\'élève' : 'Lier à un élève', icon: 'person', fn: () => {
       if (!S.work.students.length) { toast('Ajoutez d\'abord un élève dans « Élèves »'); return; }
       menu('Quel élève ?', S.work.students.map(x => ({ label: x.name, fn: () => { l.student = x.id; changed(); } })).concat(stu ? [{ label: 'Aucun élève', fn: () => { l.student = null; changed(); } }] : []));
