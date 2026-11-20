@@ -774,3 +774,39 @@ A.pickLogo = d => {
     onOk: () => {},
     text: "Pour la voir sur l'écran d'accueil : 1. Réglages, Sauvegarde, Exporter (par sécurité). 2. Supprimez l'ancienne icône. 3. Dans Safari, Partager puis « Sur l'écran d'accueil ». 4. Si vos données ont disparu, Réglages, Importer." });
 };
+
+// ----- Glisser-déposer une leçon dans le planning (appui long, puis glisser) -----
+const LESSON_DRAG = { timer: null, on: false };
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.planning .block'); if (!b || UI.moveLesson) return;
+  const d = LESSON_DRAG; clearTimeout(d.timer);
+  Object.assign(d, { el: b, id: b.dataset.id, y0: e.clientY, x0: e.clientX, dy: 0, on: false });
+  d.timer = setTimeout(() => {
+    d.timer = null; d.on = true; haptic();
+    const l = S.work.lessons.find(x => x.id === d.id); if (!l) { d.on = false; return; }
+    const s = new Date(l.start); d.h0 = s.getHours() + s.getMinutes() / 60; d.dur = typeById(l.type).dur;
+    b.classList.add('dragging'); d.small = b.querySelector('small'); d.label = d.small ? d.small.textContent : '';
+  }, 350);
+}, { passive: true });
+document.addEventListener('pointermove', e => {
+  const d = LESSON_DRAG; if (!d.el) return;
+  if (d.timer && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 8) { clearTimeout(d.timer); d.timer = null; d.el = null; return; }
+  if (!d.on) return;
+  const ROW = 34, w = S.work;
+  let h = d.h0 + (e.clientY - d.y0) / ROW;
+  h = Math.max(w.dayStart, Math.min(w.dayEnd - d.dur, Math.round(h * 4) / 4));
+  if (h !== d.h) { if (d.h !== undefined) haptic(); d.h = h; }
+  d.el.style.transform = `translateY(${(h - d.h0) * ROW}px)`;
+  if (d.small) d.small.textContent = `${fmtH(h)} – ${fmtH(h + d.dur)}`;
+}, { passive: true });
+document.addEventListener('touchmove', e => { if (LESSON_DRAG.on) e.preventDefault(); }, { passive: false });
+['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, ev => {
+  const d = LESSON_DRAG; clearTimeout(d.timer); d.timer = null;
+  if (d.on) {
+    d.on = false; suppressClick = true; setTimeout(() => { suppressClick = false; }, 500);
+    const l = S.work.lessons.find(x => x.id === d.id);
+    if (ev.type === 'pointerup' && l && d.h !== undefined && Math.abs(d.h - d.h0) > 1e-6) moveLesson(l, new Date(l.start), d.h);
+    else render();
+  }
+  d.el = null; d.h = undefined;
+}, { passive: true }));

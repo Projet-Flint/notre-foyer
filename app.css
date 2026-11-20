@@ -397,3 +397,5 @@ svg { flex: none; display: block; }
 .block.moving { outline: 3px dashed #fff; outline-offset: -5px; animation: blockpulse 1s ease-in-out infinite; }
 @keyframes blockpulse { 50% { opacity: .6; } }
 .menu .title { white-space: pre-line; }
+.block { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.block.dragging { z-index: 5; transition: none; box-shadow: 0 12px 28px rgba(0,0,0,.28); scale: 1.03; }
