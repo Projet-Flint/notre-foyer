@@ -402,3 +402,27 @@ svg { flex: none; display: block; }
 .hour.half { border-top: 1px dashed color-mix(in srgb, var(--sep) 70%, transparent); }
 .hour.half span { font-size: 9.5px; font-weight: 500; opacity: .55; }
 .block.short { padding-top: 0; padding-bottom: 0; align-items: center; line-height: 1.1; }
+
+/* ===== Thème « Nuit » : bleu nuit, verre sombre, lumière chaude de la porte ===== */
+:root[data-style="nuit"] {
+  --accent: #F2B45A; --accent-light: #FFD08A;
+  --text: #F3F1FB; --text2: #BDBBDA; --text3: #9391B8;
+  --sep: rgba(200, 200, 255, .10);
+  --glass: rgba(24, 26, 64, .48); --glass-strong: rgba(32, 34, 78, .86);
+  --glass-stroke: rgba(0, 0, 10, .55); --glass-hi: rgba(255, 214, 160, .20);
+  --shadow: 0 12px 34px rgba(0, 0, 20, .5);
+  --field: rgba(255, 255, 255, .07); --sheet: rgba(14, 16, 42, .92);
+  --orange: #FFB347; --blob-op: .55; --base: #070A1C;
+}
+:root[data-style="nuit"] #bg::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .7;
+  background-image: radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 78% 9%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 42% 33%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 88% 41%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 23% 62%, #ffe9c4 50%, transparent 51%), radial-gradient(1px 1px at 64% 71%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 88%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 93% 79%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 94%, #fff 50%, transparent 51%);
+  animation: twinkle 5s ease-in-out infinite alternate; }
+@keyframes twinkle { from { opacity: .35; } to { opacity: .8; } }
+:root[data-style="nuit"] #main h1 { text-shadow: 0 0 22px rgba(255, 190, 110, .35); }
+:root[data-style="nuit"] .glass { box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 220, 170, .14); }
+:root[data-style="nuit"] .btn.prim, :root[data-style="nuit"] .fab { background: linear-gradient(160deg, #FFD08A, #E39A3B) !important; color: #2A1A05 !important; text-shadow: none;
+  box-shadow: 0 0 24px rgba(242, 180, 90, .45), inset 0 1px 0 rgba(255, 255, 255, .6) !important; }
