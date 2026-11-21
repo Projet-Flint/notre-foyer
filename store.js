@@ -81,8 +81,9 @@ function mix(a, b, t) { const x = hexToRgb(a), y = hexToRgb(b); return rgbToHex(
 function rgba(h, a) { const [r, g, b] = hexToRgb(h); return `rgba(${r},${g},${b},${a})`; }
 // Couleurs pleines rendues translucides (verre teinté) : GLASS_ALPHA règle la transparence.
 const GLASS_ALPHA = 0.66;
-function selVars(c) { const a = GLASS_ALPHA; return `--c:${rgba(c, a)};--c-light:${rgba(mix(c, '#FFFFFF', .35), a)};--c-dark:${rgba(mix(c, '#000000', .22), a + .08)};--c-shadow:${rgba(c, .3)}`; }
-function grad(c) { const a = GLASS_ALPHA; return `linear-gradient(150deg,${rgba(mix(c, '#FFFFFF', .35), a)},${rgba(c, a)} 55%,${rgba(mix(c, '#000000', .22), a + .08)})`; }
+const flatUI = () => document.documentElement.dataset.style === 'bold';
+function selVars(c) { if (flatUI()) return `--c:${c};--c-light:${c};--c-dark:${c};--c-shadow:transparent`; const a = GLASS_ALPHA; return `--c:${rgba(c, a)};--c-light:${rgba(mix(c, '#FFFFFF', .35), a)};--c-dark:${rgba(mix(c, '#000000', .22), a + .08)};--c-shadow:${rgba(c, .3)}`; }
+function grad(c) { if (flatUI()) return c; const a = GLASS_ALPHA; return `linear-gradient(150deg,${rgba(mix(c, '#FFFFFF', .35), a)},${rgba(c, a)} 55%,${rgba(mix(c, '#000000', .22), a + .08)})`; }
 
 // ---------- Dates ----------
 const pad = n => String(n).padStart(2, '0');

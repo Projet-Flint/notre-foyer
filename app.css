@@ -426,3 +426,67 @@ svg { flex: none; display: block; }
 :root[data-style="nuit"] .glass { box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 220, 170, .14); }
 :root[data-style="nuit"] .btn.prim, :root[data-style="nuit"] .fab { background: linear-gradient(160deg, #FFD08A, #E39A3B) !important; color: #2A1A05 !important; text-shadow: none;
   box-shadow: 0 0 24px rgba(242, 180, 90, .45), inset 0 1px 0 rgba(255, 255, 255, .6) !important; }
+
+/* ===== Thème « Design C » : noir uni, typo très grasse, aplats de couleur ===== */
+:root[data-style="bold"] {
+  --base: #111214; --accent: #5B82E6; --accent-light: #7E9DEC;
+  --text: #F4F5F7; --text2: #9A9DA6; --text3: #767983;
+  --sep: rgba(255, 255, 255, .08);
+  --glass: #1C1D21; --glass-strong: #24262B; --glass-stroke: transparent; --glass-hi: transparent;
+  --shadow: none; --field: rgba(255, 255, 255, .06); --sheet: #1A1B1F; --rowbg: #1C1D21;
+  --orange: #E08A62; --danger: #FF6B5E; --blob-op: 0;
+}
+:root[data-style="bold"] body, :root[data-style="bold"] button, :root[data-style="bold"] input, :root[data-style="bold"] textarea, :root[data-style="bold"] select {
+  font-family: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif; }
+:root[data-style="bold"] #bg i { display: none; }
+:root[data-style="bold"] .glass { -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; box-shadow: none; background: var(--glass); }
+:root[data-style="bold"] .sel, :root[data-style="bold"] .block, :root[data-style="bold"] .fav, :root[data-style="bold"] .type.on { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none !important; text-shadow: none; border: 0; }
+:root[data-style="bold"] .sel { background: var(--c); }
+:root[data-style="bold"] #main h1 { font-weight: 800; font-size: 38px; letter-spacing: -.035em; text-shadow: none; }
+:root[data-style="bold"] .head .kicker, :root[data-style="bold"] .sec-h { letter-spacing: .12em; font-weight: 700; font-size: 12px; }
+:root[data-style="bold"] .btn.prim, :root[data-style="bold"] .fab { background: #4A74DE !important; border: 0; box-shadow: 0 8px 24px rgba(74, 116, 222, .35) !important; color: #fff !important; }
+:root[data-style="bold"] .week button.on, :root[data-style="bold"] .mday.on { background: #4A74DE; color: #fff; }
+:root[data-style="bold"] .num, :root[data-style="bold"] .time, :root[data-style="bold"] .tile .big, :root[data-style="bold"] .week .dn { font-variant-numeric: normal; }
+:root[data-style="bold"] .tile .big { font-weight: 800; font-size: 28px; letter-spacing: -.03em; }
+:root[data-style="bold"] .chip { background: rgba(255,255,255,.07) !important; }
+:root[data-style="bold"] .sheet, :root[data-style="bold"] .menu .group, :root[data-style="bold"] .dialog { -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Barre d'onglets : icônes seules, onglet actif en pilule bleue avec son nom */
+:root[data-style="bold"] #tabbar { background: #1C1D21; height: 66px; }
+:root[data-style="bold"] #tabbar button { flex-direction: row; gap: 8px; font-size: 15px; font-weight: 700; }
+:root[data-style="bold"] #tabbar button span { display: none; }
+:root[data-style="bold"] #tabbar button.on { flex: 2.3; }
+:root[data-style="bold"] #tabbar button.on span { display: inline; }
+:root[data-style="bold"] #tabbar .pill { background: linear-gradient(180deg, #5A82E8, #3F67D2); box-shadow: 0 6px 22px rgba(74, 116, 222, .45); }
+
+/* Accueil « Design C » */
+.bh { padding-top: calc(var(--safe-top) + 20px) !important; }
+.bh-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 0 4px 22px; }
+.bh-date { line-height: .84; font-weight: 800; letter-spacing: -.05em; }
+.bh-wd { font-size: 76px; color: #F4F5F7; }
+.bh-dn { font-size: 76px; color: #4A74DE; }
+.bh-hello { text-align: right; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-bottom: 6px; }
+.bh-actions { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; }
+.bh-actions .iconbtn { background: #1C1D21; }
+.bh-month { font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--text2); }
+.bh-name { font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bh-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1.55fr 1fr; gap: 12px; height: 300px; }
+.bh-grid .tall { grid-row: span 2; }
+.bh-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.bt { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 2px; padding: 16px; border-radius: 22px; color: #fff; text-align: left; min-width: 0; position: relative; overflow: hidden; }
+.bt.light { color: #15161A; }
+.bt.dark { background: #1C1D21; min-height: 112px; }
+.bt-l { position: absolute; top: 16px; left: 16px; right: 16px; font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt.wide .bt-l { position: static; display: block; margin-bottom: 4px; }
+.bt-time { font-size: 52px; font-weight: 800; letter-spacing: -.045em; line-height: 1; margin-bottom: 8px; }
+.bt-big { font-size: 52px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.bt-mid { font-size: 34px; font-weight: 800; letter-spacing: -.035em; line-height: 1.05; }
+.bt-t { font-size: 18px; font-weight: 700; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.bt-s { font-size: 14px; font-weight: 500; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bt.dark .bt-s { color: var(--text2); opacity: 1; }
+.bt.wide { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; margin-top: 12px; padding: 18px 16px; gap: 12px; }
+.bt-j { font-size: 44px; font-weight: 800; letter-spacing: -.045em; flex: none; }
+.bh-sec { margin: 24px 4px 0; padding-bottom: 10px; border-bottom: 1px solid var(--sep); font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text2); }
+.bh-row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 15px 4px; border-bottom: 1px solid var(--sep); text-align: left; font-size: 18px; font-weight: 600; }
+.bh-row b { font-size: 20px; font-weight: 800; letter-spacing: -.03em; width: 64px; flex: none; }
+.bh-row span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bh-row i { width: 16px; height: 16px; border-radius: 4px; flex: none; }

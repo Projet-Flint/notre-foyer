@@ -7,9 +7,9 @@ const main = document.getElementById('main'), tabbar = document.getElementById('
 // ---------- Thème et fond ----------
 function applyTheme() {
   const t = S.settings.theme || 'auto';
-  const dark = t === 'dark' || t === 'nuit' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  const dark = t === 'dark' || t === 'nuit' || t === 'bold' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  if (t === 'nuit') document.documentElement.dataset.style = 'nuit'; else delete document.documentElement.dataset.style;
+  if (t === 'nuit' || t === 'bold') document.documentElement.dataset.style = t; else delete document.documentElement.dataset.style;
   paintBackground();
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
@@ -20,6 +20,7 @@ function paintBackground() {
     : h >= 17 && h < 22 ? ['#F1ECE7', '#130F0D', ['#F0B27C', '#F0957C', '#E88FB0', '#B39CF0']]
     : ['#E6E8F0', '#090B12', ['#4F7FB8', '#7B6BD0', '#3E9C8C', '#9C7BD8']];
   let base = dark ? p[1] : p[0];
+  if (document.documentElement.dataset.style === 'bold') base = '#111214';
   if (document.documentElement.dataset.style === 'nuit') { base = '#070A1C'; p[2] = ['#2B2F8C', '#5A2E8C', '#16306A', '#B8702A']; }
   document.documentElement.style.setProperty('--base', base);
   document.querySelectorAll('#bg i').forEach((b, i) => b.style.background = p[2][i]);
@@ -187,7 +188,7 @@ setInterval(() => { if (S.work.running && UI.tab === 'travail' && !UI.view && UI
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { applyAutoSavings(); paintBackground(); if (!layerStack.length) render({ keepAnim: true }); } });
 
 // ---------- Démarrage ----------
-if (!S.settings.themeV2) { S.settings.theme = 'nuit'; S.settings.themeV2 = true; save(); } // une fois : thème Nuit demandé
+if (!S.settings.themeV3) { S.settings.theme = 'bold'; S.settings.themeV2 = S.settings.themeV3 = true; save(); } // une fois : design C demandé
 applyTheme();
 applyAutoSavings();
 render();

@@ -12,6 +12,7 @@ const fab = (action, label) => `<button class="fab btn prim press halo" data-a="
 
 // ================= Accueil =================
 function screenAccueil() {
+  if (typeof isBold === 'function' && isBold()) return screenAccueilBold();
   const now = new Date(), tk = todayKey();
   const events = eventsOn(tk);
   const todo = S.chores.filter(c => (!c.done && c.due && c.due <= tk) || (c.done && c.doneAt && dkey(new Date(c.doneAt)) === tk));
@@ -723,7 +724,7 @@ function viewReglages() {
     ${section("Icône de l'app", `<div class="logos">${[['a', 'Cœur'], ['b', 'Nous deux'], ['c', 'Nuit']].map(([l, n]) =>
       `<button class="logo press ${(S.settings.logo || 'c') === l ? 'on' : ''}" data-a="pickLogo" data-v="${l}" aria-label="Logo ${n}"><img src="icons/icon-${l}-180.png" alt=""><span>${n}</span></button>`).join('')}</div>`,
       "Sur iPhone, l'icône de l'écran d'accueil change seulement quand on remet l'app sur l'écran d'accueil.")}
-    ${section('Apparence', `<div class="field col">${seg('theme', [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre'], ['nuit', 'Nuit']], S.settings.theme || 'auto').replace('data-seg="theme"', 'data-seg="theme" data-a-seg="setTheme"')}</div>`)}
+    ${section('Apparence', `<div class="field col">${seg('theme', [['bold', 'Design C'], ['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre'], ['nuit', 'Nuit']], S.settings.theme || 'auto').replace('data-seg="theme"', 'data-seg="theme" data-a-seg="setTheme"')}</div>`)}
     ${section('Sauvegarde', `<button class="row press link-row" data-a="exportData" style="width:100%">${ic('download', 20)}<span class="main" style="text-align:left">Exporter mes données</span></button>
       <button class="row press link-row" data-a="importData" style="width:100%">${ic('upload', 20)}<span class="main" style="text-align:left">Importer une sauvegarde</span></button>`,
       'Tout est rangé dans ce téléphone, sans compte ni serveur. Exportez de temps en temps pour garder une copie (dans Fichiers ou iCloud Drive), ou pour copier vos données sur un autre téléphone.')}
