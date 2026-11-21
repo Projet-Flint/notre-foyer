@@ -721,7 +721,7 @@ function viewReglages() {
     ${lockSettingsHtml()}
     ${syncSettingsHtml()}
     ${section("Icône de l'app", `<div class="logos">${[['a', 'Cœur'], ['b', 'Nous deux'], ['c', 'Nuit']].map(([l, n]) =>
-      `<button class="logo press ${(S.settings.logo || 'b') === l ? 'on' : ''}" data-a="pickLogo" data-v="${l}" aria-label="Logo ${n}"><img src="icons/icon-${l}-180.png" alt=""><span>${n}</span></button>`).join('')}</div>`,
+      `<button class="logo press ${(S.settings.logo || 'c') === l ? 'on' : ''}" data-a="pickLogo" data-v="${l}" aria-label="Logo ${n}"><img src="icons/icon-${l}-180.png" alt=""><span>${n}</span></button>`).join('')}</div>`,
       "Sur iPhone, l'icône de l'écran d'accueil change seulement quand on remet l'app sur l'écran d'accueil.")}
     ${section('Apparence', `<div class="field col">${seg('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']], S.settings.theme || 'auto').replace('data-seg="theme"', 'data-seg="theme" data-a-seg="setTheme"')}</div>`)}
     ${section('Sauvegarde', `<button class="row press link-row" data-a="exportData" style="width:100%">${ic('download', 20)}<span class="main" style="text-align:left">Exporter mes données</span></button>
@@ -767,7 +767,7 @@ A.resetAll = () => dialog({ title: 'Tout effacer ?', text: 'Toutes les données 
   S = defaults(); localStorage.removeItem(KEY); applyTheme(); UI.view = null; UI.tab = 'famille'; render(); } });
 
 A.pickLogo = d => {
-  if ((S.settings.logo || 'b') === d.v) return;
+  if ((S.settings.logo || 'c') === d.v) return;
   S.settings.logo = d.v; applyLogo(d.v); changed();
   dialog({ title: 'Nouvelle icône choisie', ok: "J'ai compris",
     onOk: () => {},
