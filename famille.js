@@ -11,6 +11,13 @@ const A = {};   // actions déclenchées par data-a="…"
 const SECTIONS = ['Agenda', 'Courses', 'Tâches', 'Dates', 'Maison', 'Contacts'];
 
 function changed(opts) { save(); render(opts); }
+// Bouton « Supprimer » en bas d'une feuille de modification (avec confirmation).
+function sheetDelBtn(label) { return `<div class="sec"><button type="button" class="btn glass wide press danger" data-sheet-del>${ic('trash', 18)}${esc(label)}</button></div>`; }
+function bindSheetDel(r, title, fn) {
+  const b = r.querySelector('[data-sheet-del]'); if (!b) return;
+  b.addEventListener('click', () => dialog({ title, ok: 'Supprimer', danger: true, onOk: () => { closeLayer(r); fn(); } }));
+}
+const editSwipe = (a, id) => ({ a, id, icon: 'pencil', label: 'Modifier', color: THEME.accent });
 
 // ================= Écran Famille =================
 function screenFamille() {
@@ -80,20 +87,20 @@ function pageAgenda() {
   const sh = typeof shiftOn === 'function' ? shiftOn(UI.day) : null;
   let rows = '';
   if (sh) rows += `<div class="row"><span class="time">${sh.work ? esc(sh.start) : 'Repos'}</span><span class="vbar" style="background:${sh.color}"></span><div class="main"><div class="t">${esc(sh.label)}</div><div class="s">${sh.work ? esc(sh.start + ' – ' + sh.end) + ' · ' : ''}${nurseName() === H.me ? 'mon planning' : 'planning de ' + esc(nurseName())}</div></div>${chip(nurseName())}</div>`;
-  rows += datesOn(UI.day).map(x => `<div class="row"><span class="time" style="color:var(--orange)">${ic('gift', 20)}</span><span class="vbar" style="background:var(--orange)"></span><div class="main"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.kind)}</div></div></div>`).join('');
+  rows += datesOn(UI.day).map(x => `<div class="row"><span class="time" style="color:var(--orange)">${ic('gift', 20)}</span><span class="vbar" style="background:var(--orange)"></span><div class="main press" data-a="dateEdit" data-id="${x.id}"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.kind)}</div></div></div>`).join('');
   rows += list.map(e => swipeRow(
     `<span class="time">${e.allDay ? 'Journée' : esc(e.start.slice(11, 16))}</span>
      <span class="vbar" style="background:${H.color(e.who)}"></span>
-     <div class="main"><div class="t">${esc(e.title)}</div>${e.location ? `<div class="s">${esc(e.location)}</div>` : ''}</div>
+     <div class="main" data-a="eventEdit" data-id="${e.id}"><div class="t">${esc(e.title)}</div>${e.location ? `<div class="s">${esc(e.location)}</div>` : ''}</div>
      ${chip(e.who)}`,
-    [{ a: 'eventIcs', id: e.id, icon: 'calendar', label: 'Calendrier', color: THEME.both }, swipeDel('eventDel', e.id)],
+    [editSwipe('eventEdit', e.id), { a: 'eventIcs', id: e.id, icon: 'calendar', label: 'Calendrier', color: THEME.both }, swipeDel('eventDel', e.id)],
     `data-long="eventMenu" data-id="${e.id}"`)).join('');
   if (!rows) rows = `<div class="empty">Rien de prévu ce jour-là.</div>`;
   return `<div class="scroll">
     <div class="sec" style="display:flex;gap:8px;align-items:center"><div style="flex:1;min-width:0">${switcher(['Semaine', 'Mois'], mode, 'agendaMode', { key: 'agmode', cls: 'inline small' })}</div>
       <button class="iconbtn glass press" data-a="shareSchedule" data-v="agenda" aria-label="Partager l'agenda">${ic('share', 18)}</button></div>
     ${top}
-    ${section(esc(cap(dayLabel(sel))), rows)}
+    ${section(esc(cap(dayLabel(sel))), rows, list.length ? 'Touchez un rendez-vous pour le modifier, ou glissez-le vers la gauche.' : '')}
   </div>
   <button class="fab btn prim press halo" data-a="eventAdd" aria-label="Ajouter un rendez-vous">${ic('plus', 26, 2.2)}</button>`;
 }
@@ -114,20 +121,25 @@ A.eventMenu = d => {
   ]);
 };
 A.eventAdd = () => eventSheet(null);
+A.eventEdit = d => { const e = S.events.find(x => x.id === d.id); if (e) eventSheet(e); };
 function whoSeg(name, current) { return seg(name, H.everyone, current, n => H.color(n)); }
 function eventSheet(e) {
   const date = e ? e.start.slice(0, 10) : UI.day, time = e && !e.allDay ? e.start.slice(11, 16) : '12:00';
   sheet({
-    title: e ? 'Modifier' : 'Nouveau rendez-vous', ok: e ? 'OK' : 'Ajouter',
+    title: e ? 'Modifier le RDV' : 'Nouveau rendez-vous', ok: e ? 'Enregistrer' : 'Ajouter',
     body: `<div class="group glass">
-      <div class="field"><input name="title" placeholder="Quoi ? (ex. rendez-vous pédiatre)" value="${esc(e ? e.title : '')}" data-required autofocus></div>
+      <div class="field"><input name="title" placeholder="Quoi ? (ex. rendez-vous pédiatre)" value="${esc(e ? e.title : '')}" data-required ${e ? '' : 'autofocus'}></div>
       <div class="field"><span class="flabel">Quand</span><input type="date" name="date" value="${date}"></div>
       <div class="field" data-timefield ${e && e.allDay ? 'hidden' : ''}><span class="flabel">Heure</span><input type="time" name="time" value="${time}"></div>
       <div class="field"><span class="flabel">Toute la journée</span>${toggleHtml('allDay', e && e.allDay)}</div>
     </div>
     <div class="sec"><div class="sec-h">Pour qui</div>${whoSeg('who', e ? e.who : BOTH)}</div>
-    <div class="sec"><div class="group glass"><div class="field"><input name="location" placeholder="Où ? (facultatif)" value="${esc(e ? e.location : '')}"></div></div></div>`,
-    onMount: r => r.querySelector('[name=allDay]').addEventListener('change', ev => { r.querySelector('[data-timefield]').hidden = ev.target.checked; }),
+    <div class="sec"><div class="group glass"><div class="field"><input name="location" placeholder="Où ? (facultatif)" value="${esc(e ? e.location || '' : '')}"></div></div></div>
+    ${e ? sheetDelBtn('Supprimer le rendez-vous') : ''}`,
+    onMount: r => {
+      r.querySelector('[name=allDay]').addEventListener('change', ev => { r.querySelector('[data-timefield]').hidden = ev.target.checked; });
+      if (e) bindSheetDel(r, `Supprimer « ${e.title} » ?`, () => A.eventDel({ id: e.id }));
+    },
     onOk: r => {
       const allDay = val(r, 'allDay'), dt = val(r, 'date') || UI.day;
       const item = e || { id: uid() };
@@ -265,16 +277,16 @@ function pageTaches() {
   const rows = list.length ? list.map(c => {
     const due = !c.done && c.due ? ' · ' + cap(dayLabel(parseKey(c.due))) : '';
     const late = !c.done && c.due && c.due < todayKey();
-    return swipeRow(`${checkBtn(c.done, 'choreToggle', c.id)}<div class="main"><div class="t">${esc(c.title)}</div><div class="s" ${late ? 'style="color:var(--orange)"' : ''}>${esc(c.freq + due)}</div></div>
+    return swipeRow(`${checkBtn(c.done, 'choreToggle', c.id)}<div class="main" data-a="choreEdit" data-id="${c.id}"><div class="t">${esc(c.title)}</div><div class="s" ${late ? 'style="color:var(--orange)"' : ''}>${esc(c.freq + due)}</div></div>
       <button class="press" data-a="choreWho" data-id="${c.id}">${chip(c.who)}</button>`,
-      [{ a: 'choreGive', id: c.id, icon: 'swap', label: "À l'autre", color: THEME.both }, swipeDone('choreToggle', c.id, c.done), swipeDel('choreDel', c.id)],
+      [editSwipe('choreEdit', c.id), { a: 'choreGive', id: c.id, icon: 'swap', label: "À l'autre", color: THEME.both }, swipeDone('choreToggle', c.id, c.done), swipeDel('choreDel', c.id)],
       `data-long="choreMenu" data-id="${c.id}"`).replace('class="content row"', `class="content row ${c.done ? 'muted' : ''}"`);
   }).join('') : '<div class="empty">Aucune tâche ici.</div>';
   return `<div class="scroll">
     <div class="sec"><div class="sec-h">Qui fait quoi</div>${balance}<div class="grid2" style="margin-top:12px">${score(p1)}${score(p2)}</div></div>
     <div class="sec">${switcher(filters, UI.choreFilter, 'choreFilter', { key: 'chores', cls: 'inline small' })}
     <div class="group glass">${rows}</div>
-    <div class="sec-f">Glissez vers la gauche pour cocher, supprimer ou donner la tâche à l'autre. Touchez un prénom pour choisir.</div></div>
+    <div class="sec-f">Touchez une tâche pour la modifier. Glissez vers la gauche pour cocher, supprimer ou donner la tâche à l'autre. Touchez un prénom pour choisir.</div></div>
   </div>
   <button class="fab btn prim press halo" data-a="choreAdd" aria-label="Nouvelle tâche">${ic('plus', 26, 2.2)}</button>`;
 }
@@ -292,14 +304,17 @@ A.choreWho = d => { const c = S.chores.find(x => x.id === d.id); if (!c) return;
 A.choreMenu = d => { const c = S.chores.find(x => x.id === d.id); if (!c) return;
   menu(c.title, [{ label: 'Modifier', icon: 'pencil', fn: () => choreSheet(c) }, { label: 'Supprimer', icon: 'trash', danger: true, fn: () => A.choreDel(d) }]); };
 A.choreAdd = () => choreSheet(null);
+A.choreEdit = d => { const c = S.chores.find(x => x.id === d.id); if (c) choreSheet(c); };
 function choreSheet(c) {
   sheet({
-    title: c ? 'Modifier la tâche' : 'Nouvelle tâche', ok: c ? 'OK' : 'Ajouter',
-    body: `<div class="group glass"><div class="field"><input name="title" placeholder="Tâche (ex. sortir les poubelles)" value="${esc(c ? c.title : '')}" data-required autofocus></div></div>
+    title: c ? 'Modifier la tâche' : 'Nouvelle tâche', ok: c ? 'Enregistrer' : 'Ajouter',
+    body: `<div class="group glass"><div class="field"><input name="title" placeholder="Tâche (ex. sortir les poubelles)" value="${esc(c ? c.title : '')}" data-required ${c ? '' : 'autofocus'}></div></div>
       <div class="sec"><div class="sec-h">Qui s'en charge</div>${whoSeg('who', c ? c.who : (UI.choreFilter !== 'Toutes' ? UI.choreFilter : H.me))}</div>
       <div class="sec"><div class="group glass">
         <div class="field"><span class="flabel">Fréquence</span><select name="freq">${FREQS.map(f => `<option ${f === (c ? c.freq : 'Chaque semaine') ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
-        <div class="field"><span class="flabel">À partir du</span><input type="date" name="due" value="${c && c.due ? c.due : todayKey()}"></div></div></div>`,
+        <div class="field"><span class="flabel">${c ? 'Prochaine fois le' : 'À partir du'}</span><input type="date" name="due" value="${c && c.due ? c.due : todayKey()}"></div></div></div>
+      ${c ? sheetDelBtn('Supprimer la tâche') : ''}`,
+    onMount: r => { if (c) bindSheetDel(r, `Supprimer « ${c.title} » ?`, () => A.choreDel({ id: c.id })); },
     onOk: r => {
       const item = c || { id: uid(), done: false };
       Object.assign(item, { title: val(r, 'title'), who: segVal(r, 'who'), freq: val(r, 'freq'), due: val(r, 'due') || todayKey() });
@@ -333,6 +348,7 @@ A.dateMenu = d => { const x = S.dates.find(i => i.id === d.id); if (!x) return;
   menu(x.title, [{ label: 'Modifier', icon: 'pencil', fn: () => dateSheet(x) }, { label: 'Ajouter au Calendrier de l\'iPhone', icon: 'calendar', fn: () => A.dateIcs(d) },
     { label: 'Supprimer', icon: 'trash', danger: true, fn: () => A.dateDel(d) }]); };
 A.dateAdd = () => dateSheet(null);
+A.dateEdit = d => { const x = S.dates.find(i => i.id === d.id); if (x) dateSheet(x); };
 function dateSheet(x) {
   sheet({
     title: x ? 'Modifier la date' : 'Nouvelle date', ok: x ? 'OK' : 'Ajouter',
